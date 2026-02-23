@@ -1,4 +1,4 @@
-name: Django CI/CD (runserver)
+name: Django CI/CD Pipeline
 
 on:
   push:
@@ -10,19 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Deploy to EC2
+      - name: Deploy Django Application to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          port: 22
           script: |
-            cd ~/Ostad_batch-09
-            source venv/bin/activate
+
+            cd /home/ubuntu/Sinple_CI_CD_PIPELINE
+
             git pull origin main
+
+            source venv/bin/activate
+
             pip install -r requirements.txt
-            pkill -f runserver || true
-            nohup python manage.py runserver 0.0.0.0:8000 > server.log 2>&1 &
+
+            sudo systemctl daemon-reload
+            sudo systemctl restart gunicorn
